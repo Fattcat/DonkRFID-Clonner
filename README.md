@@ -1,4 +1,4 @@
-# DonkRFID-RFID-Stealer
+# DonkRFID-Clonner
 
 ## Necessary modules and stuff
 1. Arduino Nano
@@ -9,6 +9,7 @@
 6. Some Wires (about 20pcs)
 # Connection
 RFID modul:
+...
 
 SDA: Pripojte k pinu D2 na Arduino Nano.
 SCL: Pripojte k pinu D3 na Arduino Nano.
