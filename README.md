@@ -4,7 +4,7 @@
 1. Arduino Nano
 2. RC522 RFID Module
 3. 2 Buttons
-4. Oled 0.96" Display
+4. Oled 0.96" Display (V2 Do not support)
 5. BreadBoard
 6. Some Wires (about 20pcs)
 # Connection
