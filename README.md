@@ -4,23 +4,25 @@
 1. Arduino Nano
 2. RC522 RFID Module
 3. 2 Buttons
-4. Oled 0.96" Display (V2 Do not support)
-5. BreadBoard
-6. Some Wires (about 20pcs)
+4. 2x LED Diodes (RED and GREEN)
+5. 2x Resistor with 220 Ohm
+6. Bread Board
+7. Some Wires (about 20pcs)
+
 # Connection
-RFID modul:
-...
 
-SDA: Pripojte k pinu D2 na Arduino Nano.
-SCL: Pripojte k pinu D3 na Arduino Nano.
-RST (Reset): Pripojte k pinu D9 na Arduino Nano.
-SDA (Sériová komunikácia): Pripojte k pinu D10 na Arduino Nano.
-3.3V: Pripojte k napájaciemu pinu 3.3V na Arduino Nano.
-GND: Pripojte k uzemňovaciemu pinu (GND) na Arduino Nano.
+## RFID Module
+- SDA to D10
+- SCK to D13
+- MOSI to D11
+- MISO to D12
+- GND to GND
+- VCC to 3.3V
 
-OLED displej:
+## Buttons
+- Buttton Write to D2
+- Buttton Read to D3
 
-SDA (Data): Pripojte k pinu D2 na Arduino Nano.
-SCL (Clock): Pripojte k pinu D3 na Arduino Nano.
-VCC: Pripojte k napájaciemu pinu 5V (alebo 3.3V, ak je to potrebné) na Arduino Nano.
-GND: Pripojte k uzemňovaciemu pinu (GND) na Arduino Nano.
+## LED Diodes
+- LED-GREEN to D4 ! with 220 Ohm RESISTOR !
+- LED-RED to D5 ! with 220 Ohm RESISTOR !
