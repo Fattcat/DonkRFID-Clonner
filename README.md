@@ -16,6 +16,7 @@
 - SCK to D13
 - MOSI to D11
 - MISO to D12
+- RST to D9
 - GND to GND
 - VCC to 3.3V
 
