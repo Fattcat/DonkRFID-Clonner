@@ -11,19 +11,27 @@
 
 # Connection
 
-## RFID Module
-- SDA to D10
-- SCK to D13
-- MOSI to D11
-- MISO to D12
-- RST to D9
-- GND to GND
-- VCC to 3.3V
+## MFRC522 RFID:
+- SDA -> D10
+- SCK -> D13
+- MOSI -> D11
+- MISO -> D12
+- IRQ -> N/A
+- GND -> GND
+- RST -> D9
+- 3.3V -> 3.3V
 
-## Buttons
-- Buttton Write to D2
-- Buttton Read to D3
+## OLED displej:
+- VCC -> 5V
+- GND -> GND
+- SDA -> A4
+- SCL -> A5
 
-## LED Diodes
-- LED-GREEN to D4 ! with 220 Ohm RESISTOR !
-- LED-RED to D5 ! with 220 Ohm RESISTOR !
+## Tlačidlá:
+- Tlačidlo UP -> D2
+- Tlačidlo DOWN -> D3
+- Tlačidlo ENTER -> D4
+
+## LED diódy:
+- GREEN LED -> D5 (cez 220 OHM rezistor)
+- RED LED -> D6 (cez 220 OHM rezistor)
