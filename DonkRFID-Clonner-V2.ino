@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <SD.h>
 
 // Zapojenie komponentov:
 
@@ -31,6 +32,7 @@
 // Zelená LED -> D5 (cez rezistor)
 // Červená LED -> D6 (cez rezistor)
 
+
 // RFID setup
 #define SS_PIN 10
 #define RST_PIN 9
@@ -40,6 +42,9 @@ MFRC522 rfid(SS_PIN, RST_PIN);
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+// SD Card setup
+#define SD_CS_PIN 8
 
 // Button setup
 #define BUTTON_UP 2
@@ -54,7 +59,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 int cursorPosition = 0;
 bool readCard = false;
 bool writeCard = false;
-byte storedData[16]; // Assuming 16 bytes data from RFID card
+byte storedData[18]; // Assuming 16 bytes data from RFID card + 2 bytes for checksum
 
 void setup() {
   // Initialize serial
@@ -72,6 +77,13 @@ void setup() {
   display.display();
   delay(2000);
   display.clearDisplay();
+
+  // Initialize SD card
+  if (!SD.begin(SD_CS_PIN)) {
+    Serial.println("Initialization of SD card failed!");
+    while (1);
+  }
+  Serial.println("SD card is ready to use.");
 
   // Initialize buttons
   pinMode(BUTTON_UP, INPUT_PULLUP);
@@ -144,13 +156,31 @@ void readRFIDCard() {
     delay(100);
   }
 
-  // Assuming we're reading a block of data
+  // Read data from card
   MFRC522::StatusCode status = rfid.MIFARE_Read(4, storedData, &rfid.uid.size);
   if (status == MFRC522::STATUS_OK) {
     display.setCursor(0, 20);
     display.print("Karta detekovaná ...");
     display.setCursor(0, 30);
     display.print("dáta uložené");
+
+    // Save data to SD card
+    String filename = String(rfid.uid.uidByte[0]) + String(rfid.uid.uidByte[1]) + 
+                      String(rfid.uid.uidByte[2]) + String(rfid.uid.uidByte[3]) + ".txt";
+    File dataFile = SD.open(filename.c_str(), FILE_WRITE);
+    if (dataFile) {
+      for (int i = 0; i < 16; i++) {
+        dataFile.print(storedData[i], HEX);
+        if (i < 15) {
+          dataFile.print(",");
+        }
+      }
+      dataFile.close();
+    } else {
+      display.setCursor(0, 40);
+      display.print("Chyba pri zápise SD");
+      digitalWrite(LED_RED, HIGH);
+    }
     digitalWrite(LED_GREEN, HIGH);
   } else {
     display.setCursor(0, 20);
@@ -180,6 +210,7 @@ void writeRFIDCard() {
     dotCount = (dotCount + 1) % 3;
   }
 
+  // Write data to card
   MFRC522::StatusCode status = rfid.MIFARE_Write(4, storedData, 16);
   if (status == MFRC522::STATUS_OK) {
     display.setCursor(0, 20);
