@@ -23,6 +23,14 @@
 // SDA -> A4
 // SCL -> A5
 
+// SD Card:
+// VCC -> 5V
+// GND -> GND
+// MISO -> D12
+// MOSI -> D11
+// SCK -> D13
+// CS -> D8
+
 // Tlačidlá:
 // Tlačidlo UP -> D2
 // Tlačidlo DOWN -> D3
