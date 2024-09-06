@@ -4,8 +4,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define RST_PIN         9          // Configurable, see typical pin layout above
-#define SS_PIN          10         // Configurable, see typical pin layout above
+#define RST_PIN         9          // Reset pin for RFID
+#define SS_PIN          10         // Slave Select (SS) pin for RFID (SDA pin on your module)
 #define READ_BUTTON     2          // Pin for the READ button
 #define WRITE_BUTTON    3          // Pin for the WRITE button
 #define GREEN_LED       4          // Pin for the GREEN LED
@@ -14,6 +14,26 @@
 #define SCREEN_WIDTH    128        // OLED display width, in pixels
 #define SCREEN_HEIGHT   64         // OLED display height, in pixels
 #define OLED_RESET      -1         // Reset pin # (or -1 if sharing Arduino reset pin)
+
+
+// CONECTION
+// Piny na Arduino Nano:
+
+// SCK (SPI) → pin 13 na Nano
+// MOSI (SPI) → pin 11 na Nano
+// MISO (SPI) → pin 12 na Nano
+// SDA (SS) → pin 10 na Nano (označený ako SDA na RFID, ale funguje ako SS)
+// RST → pin 9 na Nano
+// IRQ → nepoužíva sa (môžeš ho ponechať nezapojený)
+// OLED displej:
+// 
+// SDA (I2C) → A4 na Nano
+// SCL (I2C) → A5 na Nano
+// LED a tlačidlá:
+// 
+// Tlačidlá sú pripojené na pin 2 (READ) a pin 3 (WRITE), pričom používame vnútorné pull-up rezistory.
+// Zelená LED na pin 4 a červená LED na pin 5, každá s odporom okolo 220 Ω.
+
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET); // OLED instance
@@ -24,13 +44,13 @@ bool uidStored = false;
 
 void setup() {
     Serial.begin(9600);         // Initialize serial communications with the PC
-    while (!Serial);            // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
+    while (!Serial);            // Wait for Serial monitor (needed on ATMEGA32U4 based boards)
     SPI.begin();                // Init SPI bus
     mfrc522.PCD_Init();         // Init MFRC522
 
-    // Pin setup
-    pinMode(READ_BUTTON, INPUT_PULLUP);  // Button for read mode
-    pinMode(WRITE_BUTTON, INPUT_PULLUP); // Button for write mode
+    // Pin setup for buttons and LEDs
+    pinMode(READ_BUTTON, INPUT_PULLUP);  // Button for read mode (using internal pull-up)
+    pinMode(WRITE_BUTTON, INPUT_PULLUP); // Button for write mode (using internal pull-up)
     pinMode(GREEN_LED, OUTPUT);          // Green LED
     pinMode(RED_LED, OUTPUT);            // Red LED
 
