@@ -19,7 +19,7 @@
 - SCK -> D13
 - MOSI -> D11
 - MISO -> D12
-- IRQ -> N/A
+- IRQ -> Not connected
 - GND -> GND
 - RST -> D9
 - 3.3V -> 3.3V
