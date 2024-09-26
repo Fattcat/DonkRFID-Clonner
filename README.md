@@ -8,6 +8,7 @@
 5. 2x Resistor with 220 Ohm (for buttons !)
 6. Bread Board
 7. Some Wires (about 20pcs)
+8. Arduino SD Card Module (Used only for DonkRFID-OledV3-SaveToSD-Card.ino) 
 ### Optional for more precisely use.
 1. 2x LED Diodes (RED and GREEN) and 2x 220 Ohm resistor (if u use LEDs)
 ### 📣 INFO 📣
@@ -30,10 +31,18 @@
 - SDA -> A4
 - SCL -> A5
 
-## 🖲 Tlačidlá:
-- Tlačidlo Read -> D2
-- Tlačidlo Emulate -> D3
+## SD Card:
+- VCC -> 5V
+- GND -> GND
+- MISO -> D12
+- MOSI -> D11
+- SCK -> D13
+- CS -> D4
 
-## 💡LED diódy:
-- GREEN LED -> D5 (cez 220 OHM rezistor)
-- RED LED -> D6 (cez 220 OHM rezistor)
+## 🖲 Buttons :
+- Button Read -> D2
+- Button Emulate -> D3
+
+## 💡LED diodes:
+- GREEN LED -> D5 (throught 220 OHM resistor)
+- RED LED -> D6 (throught 220 OHM resistor)
