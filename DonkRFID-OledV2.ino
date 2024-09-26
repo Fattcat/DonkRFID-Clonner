@@ -9,7 +9,7 @@
 #define READ_BUTTON     2
 #define WRITE_BUTTON    3
 #define GREEN_LED       4
-#define RED_LED         5
+#define RED_LED         6
 
 #define SCREEN_WIDTH    128
 #define SCREEN_HEIGHT   64
