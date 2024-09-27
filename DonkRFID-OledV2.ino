@@ -45,7 +45,7 @@ void setup() {
     display.display();
     delay(2000);
 
-    Serial.println(F("Scan PICC to see UID, SAK, type, and data blocks..."));
+    Serial.println(F("Skenovanie PICC pre zobrazenie UID, SAK, typ, a datove bloky..."));
 }
 
 void loop() {
@@ -59,17 +59,17 @@ void loop() {
 }
 
 void readRFID() {
-    Serial.println(F("Read mode activated..."));
+    Serial.println(F(" -> [READ MODE] <-"));
     display.clearDisplay();
     display.setCursor(0, 0);
-    display.print("Read mode activated...");
+    display.print(" -> [READ MODE] <-");
     display.display();
     
     if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) {
-        display.setCursor(0, 10);
-        display.print("No card found.");
+        display.setCursor(0, 20);
+        display.print("Nenasiel som kartu :(");
         display.display();
-        delay(1000);
+        blinkLED(RED_LED, 3);
         return;
     }
 
@@ -78,10 +78,10 @@ void readRFID() {
 
     blinkLED(GREEN_LED, 3);
 
-    Serial.print(F("Card UID:"));
+    Serial.print(F("-> [UID Kod karty] <-"));
     display.clearDisplay();
     display.setCursor(0, 0);
-    display.print("Card UID:");
+    display.print("-> [UID Kod karty] <-\n\n");
     for (byte i = 0; i < mfrc522.uid.size; i++) {
         Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
         Serial.print(mfrc522.uid.uidByte[i], HEX);
@@ -97,42 +97,41 @@ void readRFID() {
 
 void writeRFID() {
     if (!uidStored) {
-        Serial.println(F("No UID stored. Please read a card first."));
+        Serial.println(F("! Nie je ULOZENE UID !. Prosim prilozte kartu, a ztlacte tlacidlo READ."));
         display.clearDisplay();
         display.setCursor(0, 0);
-        display.print("No UID stored.");
+        display.print("! Neny ULOZENE UID !");
         display.display();
         blinkLED(RED_LED, 3);
-        delay(1000);
         return;
     }
 
-    Serial.println(F("Write mode activated..."));
+    Serial.println(F(" -> [WRITE MODE] <-"));
     display.clearDisplay();
     display.setCursor(0, 0);
-    display.print("Write mode activated...");
+    display.print(" -> [WRITE MODE] <-");
     display.display();
     
     if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) {
-        display.setCursor(0, 10);
-        display.print("No card found.");
+        display.setCursor(0, 20);
+        display.print("Nenasiel som kartu :(");
         display.display();
-        delay(1000);
+        blinkLED(RED_LED, 3);
         return;
     }
 
     if (mfrc522.MIFARE_SetUid(storedUID, (byte)4, true)) {
-        Serial.println(F("Successfully wrote UID to new card."));
+        Serial.println(F("Uspesne ZAPISANE UID do novej\nkarty"));
         display.clearDisplay();
         display.setCursor(0, 0);
-        display.print("UID written!");
+        display.print("UID Zapisane!");
         display.display();
         blinkLED(GREEN_LED, 3);
     } else {
-        Serial.println(F("Failed to write UID to new card."));
+        Serial.println(F("NEuspesne zapisane UID do\nnovej karty."));
         display.clearDisplay();
         display.setCursor(0, 0);
-        display.print("Write failed!");
+        display.print("!UID Zapisanie\n    !NEuspesne!");
         display.display();
         blinkLED(RED_LED, 3);
     }
