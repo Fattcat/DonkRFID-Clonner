@@ -156,7 +156,7 @@ void writeRFID() {
 }
 
 void saveUIDToFile(String uidString) {
-    File dataFile = SD.open("RFID-Data.txt", FILE_APPEND); // Open file in append mode
+    File dataFile = SD.open("RFID-Data.txt", FILE_WRITE); // Open file in write mode (which allows appending)
     if (dataFile) {
         dataFile.println("UID: " + uidString); // Write UID to the file
         dataFile.close(); // Close the file
@@ -165,6 +165,7 @@ void saveUIDToFile(String uidString) {
         Serial.println(F("Error opening RFID-Data.txt"));
     }
 }
+
 
 void blinkLED(int ledPin, int times) {
     for (int i = 0; i < times; i++) {
