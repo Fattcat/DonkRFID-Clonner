@@ -7,11 +7,17 @@
 #define RST_PIN 9         // RFID RST pin
 #define CS_SD_PIN 4       // SD karta CS pin (na D4)
 
+#define LED_RED 3
+#define LED_GREEN 5      // Pridané definovanie pre LED_GREEN
+
 MFRC522 rfid(SS_PIN, RST_PIN);  // Objekt pre RFID
 File myFile;                    // Súbor pre SD kartu
 
 void setup() {
   Serial.begin(9600);          // Inicializácia sériovej komunikácie
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);  // Nastavenie LED_GREEN ako výstup
+
   SPI.begin();                 // Inicializácia SPI
   Wire.begin();                // Inicializácia I2C
 
@@ -22,9 +28,26 @@ void setup() {
   // Inicializácia SD karty
   if (!SD.begin(CS_SD_PIN)) {
     Serial.println("Initialization of SD card failed!");
-    return;
+    
+    // Blink LED_RED tri krát
+    for(int i = 0; i < 3; i++) {
+      digitalWrite(LED_RED, HIGH);
+      delay(100);
+      digitalWrite(LED_RED, LOW);
+      delay(100);
+    }
+    return;  // Ukonči funkciu setup, ak inicializácia zlyhá
   }
+  
   Serial.println("SD card initialized.");
+
+  // Blink LED_GREEN tri krát
+  for(int i = 0; i < 3; i++) {
+    digitalWrite(LED_GREEN, HIGH);
+    delay(100);
+    digitalWrite(LED_GREEN, LOW);
+    delay(100);
+  }
 
   delay(1000);
 }
@@ -41,7 +64,7 @@ void loop() {
   }
 
   // Otvor súbor na zápis (pridanie údajov)
-  myFile = SD.open("rfid.txt", FILE_WRITE); // !! CREATE FILE "rfid.txt" IN YOUR 8 GB SD Card !!
+  myFile = SD.open("rfid.txt", FILE_WRITE);
   if (myFile) {
     Serial.print("Card UID: ");
     myFile.print("Card UID: ");
@@ -59,9 +82,26 @@ void loop() {
     // Zatvor súbor
     myFile.close();
     Serial.println("UID uložené do SD karty.");
+
+    // Blink LED_GREEN tri krát
+    for(int i = 0; i < 3; i++) {
+      digitalWrite(LED_GREEN, HIGH);
+      delay(100);
+      digitalWrite(LED_GREEN, LOW);
+      delay(100);
+    }
+    
   } else {
     // Ak súbor nebolo možné otvoriť, vypíš chybovú správu
-    Serial.println("Error opening RFID-Data.txt");
+    Serial.println("Error opening rfid.txt");
+
+    // Blink LED_RED tri krát
+    for(int i = 0; i < 3; i++) {
+      digitalWrite(LED_RED, HIGH);
+      delay(100);
+      digitalWrite(LED_RED, LOW);
+      delay(100);
+    }
   }
 
   // Zastavenie komunikácie s kartou
