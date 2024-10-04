@@ -7,7 +7,7 @@
 #define RST_PIN 9         // RFID RST pin
 #define CS_SD_PIN 4       // SD karta CS pin (na D4)
 
-#define LED_RED 3
+#define LED_RED 6
 #define LED_GREEN 5      // Pridané definovanie pre LED_GREEN
 
 MFRC522 rfid(SS_PIN, RST_PIN);  // Objekt pre RFID
