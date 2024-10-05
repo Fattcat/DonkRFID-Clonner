@@ -1,6 +1,10 @@
-# DonkRFID-Clonner
-
-## 📝Necessary modules and stuff
+<div align="center">
+  # DonkRFID-Clonner
+  - With this you are able to clone your RFID tag
+</div>
+<div align="center">
+  ## 📝Necessary modules and stuff
+</div>
 1. Arduino Nano
 2. Oled Display 0.96 Inch
 3. RC522 RFID Module
