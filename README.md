@@ -1,9 +1,9 @@
 <div align="center">
-  # DonkRFID-Clonner
-  - With this you are able to clone your RFID tag
+   <h1>DonkRFID-Clonner</h1>
+   <p>With this you are able to clone your RFID tag</p>
 </div>
 <div align="center">
-  ## 📝Necessary modules and stuff
+  <h1>📝Necessary modules and stuff</h1>h1>
 </div>
 1. Arduino Nano
 2. Oled Display 0.96 Inch
