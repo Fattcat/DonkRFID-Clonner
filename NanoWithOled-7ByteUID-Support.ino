@@ -18,7 +18,7 @@
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-byte storedUID[10];  // Môže byť 4 alebo 7 bytov, ukladáme max. 10 bytov pre bezpečnosť
+byte storedUID[10];  // 10 byte buffer pre 4-byte alebo 7-byte UID (a viac ak by bolo potrebné)
 byte uidSize = 0;    // Premenná pre veľkosť UID
 bool uidStored = false;
 
@@ -66,7 +66,7 @@ void readRFID() {
     display.print(" -> [READ MODE] <-");
     display.display();
 
-    if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) {
+    if (!mfrc522.PICC_IsNewCardPresent()) {
         display.setCursor(0, 20);
         display.print("Nenasiel som kartu :(");
         display.display();
@@ -74,28 +74,47 @@ void readRFID() {
         return;
     }
 
+    if (!mfrc522.PICC_ReadCardSerial()) {
+        display.setCursor(0, 20);
+        display.print("Nepodarilo sa precitat kartu :(");
+        display.display();
+        blinkLED(RED_LED, 3);
+        return;
+    }
+
     // Uloženie veľkosti a UID
     uidSize = mfrc522.uid.size;
-    memcpy(storedUID, mfrc522.uid.uidByte, uidSize);
-    uidStored = true;
 
-    blinkLED(GREEN_LED, 3);
+    // Kontrola, či je karta so 7-byte UID alebo iným formátom
+    if (uidSize == 4 || uidSize == 7) {
+        memcpy(storedUID, mfrc522.uid.uidByte, uidSize);
+        uidStored = true;
 
-    Serial.print(F("-> [UID Kod karty] <-"));
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.print("-> [UID Kod karty] <-\n\n");
-    for (byte i = 0; i < uidSize; i++) {  // Cyklus pre dynamickú veľkosť UID
-        Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-        Serial.print(mfrc522.uid.uidByte[i], HEX);
+        blinkLED(GREEN_LED, 3);
 
-        display.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-        display.print(mfrc522.uid.uidByte[i], HEX);
+        Serial.print(F("-> [UID Kod karty] <-"));
+        display.clearDisplay();
+        display.setCursor(0, 0);
+        display.print("-> [UID Kod karty] <-\n\n");
+        for (byte i = 0; i < uidSize; i++) {  // Cyklus pre dynamickú veľkosť UID
+            Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+            Serial.print(mfrc522.uid.uidByte[i], HEX);
+
+            display.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+            display.print(mfrc522.uid.uidByte[i], HEX);
+        }
+        Serial.println();
+        display.display();
+
+        mfrc522.PICC_HaltA();
+    } else {
+        Serial.println(F("Nepodporovaný formát UID."));
+        display.clearDisplay();
+        display.setCursor(0, 0);
+        display.print("Nepodporovaný UID.");
+        display.display();
+        blinkLED(RED_LED, 3);
     }
-    Serial.println();
-    display.display();
-
-    mfrc522.PICC_HaltA();
 }
 
 void writeRFID() {
@@ -123,7 +142,7 @@ void writeRFID() {
         return;
     }
 
-    // Skontrolovať, či môže karta akceptovať zapisované UID (4 alebo 7 byte)
+    // Zápis UID s ohľadom na jeho veľkosť (4 alebo 7 byte)
     if (mfrc522.MIFARE_SetUid(storedUID, uidSize, true)) {
         Serial.println(F("Uspesne ZAPISANE UID do novej\nkarty"));
         display.clearDisplay();
