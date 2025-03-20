@@ -56,8 +56,8 @@ void loop() {
             hfCopy();
         } else if (command == "hf write") {
             hfWrite();
-        } else if (command == "") {
-            help();
+        } else if (command == "-h" || command == "--help") {
+            help();  // Zavoláme funkciu help()
         } else {
             Serial.println(F("Neznámy príkaz. Skúste: hf search, hf read, hf copy, hf write."));
         }
@@ -66,7 +66,7 @@ void loop() {
 
 void help() {
     Serial.print(F("Arduino Proxmardk3 easy console Emulator\nCommands:\n - [+] hf search - attach RFID card and write this command, then hit ENTER\n - [+] hf copy - for copying which was previously read\n \n - [+] hf write for write"));
-
+}
 void hfSearch() {
     Serial.println(F(" -> [HF SEARCH] <-"));
     display.clearDisplay();
