@@ -40,6 +40,7 @@ void setup() {
     display.print(F("Proxmark3 emulátor\n\nZadaj príkaz cez\nSerial Monitor."));
     display.display();
     delay(2000);
+    Serial.print(F("Proxmark3 Easy DonkRF One Emulator V1.0.0\n-- [+] TYPE -h or --help for more details"));
 }
 
 void loop() {
@@ -55,11 +56,16 @@ void loop() {
             hfCopy();
         } else if (command == "hf write") {
             hfWrite();
+        } else if (command == "") {
+            help();
         } else {
             Serial.println(F("Neznámy príkaz. Skúste: hf search, hf read, hf copy, hf write."));
         }
     }
 }
+
+void help() {
+    Serial.print(F("Arduino Proxmardk3 easy console Emulator\nCommands:\n - [+] hf search - attach RFID card and write this command, then hit ENTER\n - [+] hf copy - for copying which was previously read\n \n - [+] hf write for write"));
 
 void hfSearch() {
     Serial.println(F(" -> [HF SEARCH] <-"));
@@ -68,9 +74,19 @@ void hfSearch() {
     display.print(" -> [HF SEARCH] <-");
     display.display();
 
-    if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) {
+    if (!mfrc522.PICC_IsNewCardPresent()) {
+        Serial.println(F("Žiadna karta nebola nájdená!"));
         display.setCursor(0, 20);
-        display.print("Nenasiel som kartu :(");
+        display.print("Žiadna karta.");
+        display.display();
+        blinkLED(RED_LED, 3);
+        return;
+    }
+
+    if (!mfrc522.PICC_ReadCardSerial()) {
+        Serial.println(F("Nedá sa prečítať kartu!"));
+        display.setCursor(0, 20);
+        display.print("Chyba pri čítaní");
         display.display();
         blinkLED(RED_LED, 3);
         return;
@@ -80,38 +96,18 @@ void hfSearch() {
     memcpy(storedUID, mfrc522.uid.uidByte, uidLength);
     uidStored = true;
 
-    // Vytlač informácie o karte
-    Serial.println(F("\nZistené informácie o karte:"));
-    Serial.print(F("Typ karty (SAK): "));
-    byte sak = mfrc522.PICC_GetType(mfrc522.uid.sak);
-    Serial.println(sak, HEX);
-    
     Serial.print(F("UID: "));
     for (byte i = 0; i < uidLength; i++) {
-        Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-        Serial.print(mfrc522.uid.uidByte[i], HEX);
+        Serial.print(storedUID[i] < 0x10 ? " 0" : " ");
+        Serial.print(storedUID[i], HEX);
     }
     Serial.println();
-    
-    // Pre ďalšie informácie o karte:
-    byte version[2];
-    mfrc522.PCD_ReadRegister(mfrc522.VersionReg, version, 2);
-    Serial.print(F("Verzia čipu: "));
-    Serial.print(version[0], HEX);
-    Serial.print(F(" "));
-    Serial.println(version[1], HEX);
 
-    // Získanie pamäťovej veľkosti karty (pre MIFARE Classic)
-    byte size = mfrc522.PICC_ReadCardSerial() ? mfrc522.PICC_GetType(mfrc522.uid.sak) : 0;
-    Serial.print(F("Veľkosť pamäte karty: "));
-    Serial.println(size);
-
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.print("UID Karty: ");
+    display.setCursor(0, 20);
+    display.print("UID: ");
     for (byte i = 0; i < uidLength; i++) {
-        display.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-        display.print(mfrc522.uid.uidByte[i], HEX);
+        display.print(storedUID[i] < 0x10 ? " 0" : " ");
+        display.print(storedUID[i], HEX);
     }
     display.display();
 
