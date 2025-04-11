@@ -1,75 +1,77 @@
 #include <SoftwareSerial.h>
-#include <SPI.h>
 #include <SD.h>
 
-#define RDM6300_RX 2  // Pripojené na TX pinu RDM6300
-#define RDM6300_TX 3  // Nevyužité, ale potrebné pre SoftSerial
-#define SD_CS 10      // Chip select pre SD kartu
+#define RFID_RX 6
+#define RFID_TX 8
+#define SD_CS 10 // Chip Select pin pre SD kartu
 
-SoftwareSerial rfidSerial(RDM6300_RX, RDM6300_TX); // RX, TX
-File dataFile;
+const int BUFFER_SIZE = 14;
+const int DATA_TAG_SIZE = 8;
+
+SoftwareSerial ssrfid(RFID_RX, RFID_TX);
+uint8_t buffer[BUFFER_SIZE];
+int buffer_index = 0;
 
 void setup() {
   Serial.begin(9600);
-  rfidSerial.begin(9600);
-  
+  ssrfid.begin(9600);
+  ssrfid.listen();
+
   Serial.println("Inicializujem SD kartu...");
   if (!SD.begin(SD_CS)) {
-    Serial.println("SD karta sa nenašla alebo chyba inicializácie!");
-    return;
+    Serial.println("⚠️ Chyba: SD karta sa nenačítala.");
+    while (true);
   }
-  Serial.println("SD karta je pripravená.");
-
+  Serial.println("✅ SD karta inicializovaná.");
   Serial.println("Čakám na RFID kartu...");
 }
 
 void loop() {
-  if (rfidSerial.available() >= 14) { // 1 byte start, 10 data, 2 checksum, 1 end
-    if (rfidSerial.read() == 0x02) { // Start byte
+  if (ssrfid.available() > 0) {
+    bool call_extract_tag = false;
+    int ssvalue = ssrfid.read();
 
-      char tagData[11]; // 10 znakov + '\0'
-      for (int i = 0; i < 10; i++) {
-        while (!rfidSerial.available()); // Čakaj na dáta
-        tagData[i] = rfidSerial.read();
-      }
-      tagData[10] = '\0'; // Ukončovací znak pre string
+    if (ssvalue == -1) return;
 
-      // Prečítaj checksum
-      char checksum[3];
-      for (int i = 0; i < 2; i++) {
-        while (!rfidSerial.available());
-        checksum[i] = rfidSerial.read();
-      }
-      checksum[2] = '\0';
+    if (ssvalue == 2) buffer_index = 0;
+    else if (ssvalue == 3) call_extract_tag = true;
 
-      // Prečítaj end byte
-      while (!rfidSerial.available());
-      if (rfidSerial.read() != 0x03) {
-        Serial.println("Chyba: Nesprávny end byte");
-        return;
-      }
+    if (buffer_index >= BUFFER_SIZE) {
+      Serial.println("⚠️ Chyba: Buffer overflow!");
+      return;
+    }
 
-      // Výpis dát do Serial Monitoru
-      Serial.print("ID karty: ");
-      Serial.println(tagData);
-      Serial.print("Checksum: ");
-      Serial.println(checksum);
-      Serial.println("-------------------");
+    buffer[buffer_index++] = ssvalue;
 
-      // Zápis do SD karty
-      dataFile = SD.open("125khz-data.txt", FILE_WRITE);
-      if (dataFile) {
-        dataFile.print("ID karty: ");
-        dataFile.println(tagData);
-        dataFile.print("Checksum: ");
-        dataFile.println(checksum);
-        dataFile.println("-------------------");
-        dataFile.close();
-      } else {
-        Serial.println("Chyba pri zápise do súboru!");
-      }
-
-      delay(2000); // Zamedzenie opakovanému čítaniu tej istej karty
+    if (call_extract_tag && buffer_index == BUFFER_SIZE) {
+      process_tag();
     }
   }
+}
+
+void process_tag() {
+  char* msg_data_tag = (char*)(buffer + 3); // offset o 3 pre prístup k samotnému TAGu
+
+  Serial.println("-------------------");
+  Serial.print("ID karty (HEX): ");
+  for (int i = 0; i < DATA_TAG_SIZE; ++i) {
+    Serial.print(msg_data_tag[i]);
+  }
+  Serial.println();
+  Serial.println("-------------------");
+
+  // Uloženie na SD kartu
+  File file = SD.open("125khz-data.txt", FILE_WRITE);
+  if (file) {
+    for (int i = 0; i < DATA_TAG_SIZE; ++i) {
+      file.print(msg_data_tag[i]);
+    }
+    file.println();
+    file.println("-------------------");
+    file.close();
+  } else {
+    Serial.println("⚠️ Chyba: Nepodarilo sa otvoriť súbor.");
+  }
+
+  buffer_index = 0;
 }
