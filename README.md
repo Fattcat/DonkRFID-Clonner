@@ -30,6 +30,12 @@
 - Just added for show status (RED lights up if emulating or reading failed and green for opposite)
 # Connection
 
+## RDM6300
+- VCC -> 5V
+- GND -> GND
+- TX -> D6
+- RX -> D8
+
 ## MFRC522 RFID:
 - SDA -> D10
 - SCK -> D13
