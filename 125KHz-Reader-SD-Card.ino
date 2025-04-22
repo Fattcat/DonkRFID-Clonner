@@ -16,6 +16,7 @@ uint8_t buffer[BUFFER_SIZE];
 int buffer_index = 0;
 
 bool sd_ready = false;
+const char* filename = "rfid-data.txt";
 
 void setup() {
   pinMode(GREEN_LED, OUTPUT);
@@ -36,6 +37,24 @@ void setup() {
 
   sd_ready = true;
   Serial.println("✅ SD karta inicializovaná.");
+
+  // Overenie existencie súboru
+  if (SD.exists(filename)) {
+    Serial.println("Súbor existuje. Bude použitý na zápis.");
+  } else {
+    Serial.println("Súbor neexistuje. Vytváram nový súbor...");
+    File newFile = SD.open(filename, FILE_WRITE);
+    if (newFile) {
+      newFile.println("Záznamy RFID kariet:");
+      newFile.close();
+      Serial.println("Súbor vytvorený.");
+    } else {
+      Serial.println("⚠️ Chyba: Nepodarilo sa vytvoriť súbor.");
+      digitalWrite(RED_LED, HIGH);
+      while (true);
+    }
+  }
+
   Serial.println("Čakám na RFID kartu...");
 }
 
@@ -88,9 +107,9 @@ void process_tag() {
   Serial.println(card_type);
   Serial.println("-------------------");
 
-  // Pokus o zápis na SD kartu
+  // Pokus o zápis do súboru, ktorý bol overený/skontrolovaný v setup()
   if (sd_ready) {
-    File file = SD.open("rfid-data.txt", FILE_WRITE);
+    File file = SD.open(filename, FILE_WRITE);
     if (file) {
       file.print("UID: ");
       for (int i = 0; i < DATA_TAG_SIZE; ++i) {
@@ -98,14 +117,13 @@ void process_tag() {
       }
       file.print(" , Card Type: ");
       file.println(card_type);
-      file.println(); // Prázdny riadok
       file.close();
 
       // Indikácia úspechu
-      blinkLED(GREEN_LED, 5, 100);
+      blinkLED(GREEN_LED, 3, 100);
     } else {
-      Serial.println("⚠️ Chyba: Nepodarilo sa otvoriť súbor.");
-      blinkLED(RED_LED, 5, 100);
+      Serial.println("⚠️ Chyba: Nepodarilo sa otvoriť existujúci súbor.");
+      blinkLED(RED_LED, 3, 100);
     }
   }
 }
