@@ -21,7 +21,7 @@ uint8_t buffer[BUFFER_SIZE];
 int buffer_index = 0;
 
 bool sd_ready = false;
-const char* filename = "rfid-data.txt";
+const char* filename = "rfid.txt"; // 4 character lenght because previously it does not work with rfid-data.txt 
 
 void setup() {
   pinMode(GREEN_LED, OUTPUT);
