@@ -6,8 +6,8 @@
 #include <SoftwareSerial.h>
 #include <SD.h>
 
-#define RFID_RX 6
-#define RFID_TX 8
+#define RFID_RX 2
+#define RFID_TX 3
 #define SD_CS 10
 
 #define GREEN_LED 4
