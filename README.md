@@ -60,6 +60,12 @@
 - SCK -> D13
 - CS -> D4
 
+## RTC DS1307 or SD3231:
+- VCC -> 5V
+- GND -> GND
+- SCL -> A5
+- SDA -> A4
+
 ## 🖲 Buttons :
 - Button Read -> D2
 - Button Emulate -> D3
