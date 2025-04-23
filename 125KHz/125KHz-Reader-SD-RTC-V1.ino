@@ -1,4 +1,5 @@
 // tested : Yes
+// Works  : Yes, like it should (I think, u can to test it :D)
 // Added RTC Module DS3231
 // ---------------------------
 #include <Wire.h>
@@ -8,12 +9,12 @@
 
 RTC_DS3231 rtc;
 
-#define RED_LED 8
-#define GREEN_LED 7
+#define RED_LED 5
+#define GREEN_LED 4
 #define SD_CS_PIN 10
 
 // Nastav SoftSerial pre RFID čítačku
-SoftwareSerial rfidSerial(2, 3); // RX, TX -> ! Pozor RDM6300 pin "RX" pripoj na arduino nano pin D3, a pin "TX" na pin D2!
+SoftwareSerial rfidSerial(2, 3); // RX, TX -> ! Pozor RDM6300 pin "RX" pripoj na arduino nano pin D3, a pin "TX" na arduino nano pin D2 !
 
 String lastUID = "";  // Na zamedzenie opakovaného výpisu
 const int BUFFER_SIZE = 14;
@@ -50,6 +51,7 @@ void setup() {
     digitalWrite(RED_LED, HIGH); // Zostane svietiť
   } else {
     Serial.println("SD karta pripojená.");
+    sd_ready = true;
   }
 
   // Overenie existencie súboru na SD karte
@@ -64,7 +66,7 @@ void setup() {
       Serial.println("Súbor vytvorený.");
     } else {
       Serial.println("Chyba pri vytváraní súboru.");
-      digitalWrite(RED_LED, HIGH);
+      digitalWrite(RED_LED, HIGH); // Zapne červenú LED, ak súbor sa nedá vytvoriť
       while (1);
     }
   }
@@ -142,13 +144,16 @@ void process_tag() {
       file.println("-------------------");
       file.close();
 
-      // Indikácia úspechu
-      digitalWrite(GREEN_LED, HIGH);
-      delay(300);
-      digitalWrite(GREEN_LED, LOW);
+      // Blikanie LED 5x rýchlo po úspešnom zápise
+      for (int i = 0; i < 5; i++) {
+        digitalWrite(GREEN_LED, HIGH);
+        delay(100);
+        digitalWrite(GREEN_LED, LOW);
+        delay(100);
+      }
     } else {
       Serial.println("Chyba pri zápise do súboru.");
-      digitalWrite(RED_LED, HIGH);
+      digitalWrite(RED_LED, HIGH); // Indikácia chyby zápisu
     }
   }
 }
