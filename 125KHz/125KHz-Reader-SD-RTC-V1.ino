@@ -1,143 +1,82 @@
-// tested : No
-// Added RTC Module
+// tested : Yes
+// Added RTC Module DS3231
 // ---------------------------
-
-#include <SoftwareSerial.h>
-#include <SD.h>
 #include <Wire.h>
-#include <RTClib.h>  // Podporuje DS1307 aj DS3231
+#include "RTClib.h"
+#include <SD.h>
+#include <SoftwareSerial.h>
 
-#define RFID_RX 6
-#define RFID_TX 8
-#define SD_CS 10
-#define GREEN_LED 4
-#define RED_LED 5
+RTC_DS3231 rtc;
 
-const int BUFFER_SIZE = 14;
-const int DATA_TAG_SIZE = 8;
+#define RED_LED 8
+#define GREEN_LED 7
+#define SD_CS_PIN 10
 
-SoftwareSerial ssrfid(RFID_RX, RFID_TX);
-RTC_DS3231 rtc;  // Zmena: použitie DS3231 namiesto DS1307
-uint8_t buffer[BUFFER_SIZE];
-int buffer_index = 0;
+// Nastav SoftSerial pre RFID čítačku
+SoftwareSerial rfidSerial(2, 3); // RX, TX
+
+String lastUID = "";  // na zamedzenie opakovaného výpisu
 
 void setup() {
   Serial.begin(9600);
-  ssrfid.begin(9600);
-  ssrfid.listen();
+  rfidSerial.begin(9600);
 
-  pinMode(GREEN_LED, OUTPUT);
   pinMode(RED_LED, OUTPUT);
-  digitalWrite(GREEN_LED, LOW);
+  pinMode(GREEN_LED, OUTPUT);
   digitalWrite(RED_LED, LOW);
+  digitalWrite(GREEN_LED, LOW);
 
-  Wire.begin();
+  // Inicializácia RTC
   if (!rtc.begin()) {
-    Serial.println("⚠️ Chyba: RTC DS3231 neodpovedá.");
-    signalError(3);
+    Serial.println("Chyba: RTC modul nie je pripojený!");
+    digitalWrite(RED_LED, HIGH);
+    while (1);
   }
 
-  if (rtc.lostPower()) {
-    Serial.println("⚠️ RTC DS3231 stratil napájanie. Nastavujem čas...");
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));  // nastav len raz
+  // Nastavenie času – odkomentuj IBA raz nahraj kód,a potom zakomentuj a znova nahraj
+  // rtc.adjust(DateTime(2025, 4, 23, 18, 24, 0)); // ← Aktuálny čas zakomentuj po prvom nahratí
+
+  // Inicializácia SD karty
+  if (!SD.begin(SD_CS_PIN)) {
+    Serial.println("Chyba: SD karta sa nenačítala!");
+    digitalWrite(RED_LED, HIGH); // Zostane svietiť
   }
 
-  Serial.println("Inicializujem SD kartu...");
-  if (!SD.begin(SD_CS)) {
-    Serial.println("⚠️ Chyba: SD karta nie je pripojená.");
-    signalError(2);
-    while (true);
-  }
-
-  File file = SD.open("RFID-Data.txt", FILE_WRITE);
-  if (!file) {
-    Serial.println("⚠️ Chyba: Nepodarilo sa otvoriť súbor.");
-    signalError(5);
-  } else {
-    file.close();
-    Serial.println("✅ SD karta a súbor pripravený.");
-  }
-
-  Serial.println("Čakám na RFID kartu...");
+  Serial.println("Systém pripravený.");
 }
 
 void loop() {
-  if (ssrfid.available() > 0) {
-    digitalWrite(GREEN_LED, HIGH);
-    bool call_extract_tag = false;
-    int ssvalue = ssrfid.read();
-
-    if (ssvalue == -1) return;
-
-    if (ssvalue == 2) buffer_index = 0;
-    else if (ssvalue == 3) call_extract_tag = true;
-
-    if (buffer_index >= BUFFER_SIZE) {
-      Serial.println("⚠️ Buffer overflow!");
-      digitalWrite(GREEN_LED, LOW);
-      signalError(4);
-      return;
-    }
-
-    buffer[buffer_index++] = ssvalue;
-
-    if (call_extract_tag && buffer_index == BUFFER_SIZE) {
-      process_tag();
-    }
-  }
-}
-
-void process_tag() {
-  char* msg_data_tag = (char*)(buffer + 3);
-  char uid[DATA_TAG_SIZE + 1] = {0};
-  for (int i = 0; i < DATA_TAG_SIZE; i++) {
-    uid[i] = msg_data_tag[i];
-  }
-
+  // 1. Zobraz aktuálny čas
   DateTime now = rtc.now();
-
-  Serial.println("-------------------");
-  Serial.print("UID: ");
-  Serial.println(uid);
   Serial.print("Čas: ");
-  Serial.print(now.timestamp(DateTime::TIMESTAMP_DATE));
-  Serial.print(" ");
-  Serial.println(now.timestamp(DateTime::TIMESTAMP_TIME));
-  Serial.println("-------------------");
+  Serial.print(now.hour());
+  Serial.print(":");
+  Serial.print(now.minute());
+  Serial.print(":");
+  Serial.println(now.second());
 
-  File file = SD.open("RFID-Data.txt", FILE_WRITE);
-  if (file) {
-    file.print("UID: ");
-    file.print(uid);
-    file.print(", Time: ");
-    file.print(now.timestamp(DateTime::TIMESTAMP_DATE));
-    file.print(" ");
-    file.println(now.timestamp(DateTime::TIMESTAMP_TIME));
-    file.close();
-    digitalWrite(GREEN_LED, LOW);
-    blinkLED(GREEN_LED, 3, 100);
-  } else {
-    digitalWrite(GREEN_LED, LOW);
-    signalError(5);
+  // 2. RFID načítanie (ak je dostupné niečo na porte)
+  if (rfidSerial.available() > 0) {
+    String uid = "";
+    while (rfidSerial.available() > 0) {
+      char ch = rfidSerial.read();
+      uid += ch;
+      delay(5);
+    }
+
+    uid.trim(); // odstráni medzery
+    if (uid != lastUID && uid.length() > 0) {
+      Serial.print("Načítaná karta: ");
+      Serial.println(uid);
+
+      // Zablikaj zelenou LED
+      digitalWrite(GREEN_LED, HIGH);
+      delay(300);
+      digitalWrite(GREEN_LED, LOW);
+
+      lastUID = uid; // uloží poslednú UID
+    }
   }
 
-  buffer_index = 0;
-}
-
-void signalError(int count) {
-  for (int i = 0; i < count; i++) {
-    digitalWrite(RED_LED, HIGH);
-    delay(500);
-    digitalWrite(RED_LED, LOW);
-    delay(500);
-  }
-}
-
-void blinkLED(int pin, int count, int speed) {
-  for (int i = 0; i < count; i++) {
-    digitalWrite(pin, HIGH);
-    delay(speed);
-    digitalWrite(pin, LOW);
-    delay(speed);
-  }
+  delay(1000);
 }
