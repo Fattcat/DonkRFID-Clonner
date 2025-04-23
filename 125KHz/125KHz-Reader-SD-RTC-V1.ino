@@ -8,8 +8,8 @@
 
 RTC_DS3231 rtc;
 
-#define RED_LED 8
-#define GREEN_LED 7
+#define RED_LED 5
+#define GREEN_LED 4
 #define SD_CS_PIN 10
 
 // Nastav SoftSerial pre RFID čítačku
