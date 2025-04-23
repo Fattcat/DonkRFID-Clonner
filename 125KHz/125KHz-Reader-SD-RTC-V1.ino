@@ -140,4 +140,4 @@ void blinkLED(int pin, int count, int speed) {
     digitalWrite(pin, LOW);
     delay(speed);
   }
-}0
+}
