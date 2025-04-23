@@ -8,12 +8,12 @@
 
 RTC_DS3231 rtc;
 
-#define RED_LED 5
-#define GREEN_LED 4
+#define RED_LED 8
+#define GREEN_LED 7
 #define SD_CS_PIN 10
 
 // Nastav SoftSerial pre RFID čítačku
-SoftwareSerial rfidSerial(2, 3); // RX, TX
+SoftwareSerial rfidSerial(2, 3); // RX, TX -> ! Pozor RDM6300 pin "RX" pripoj na arduino nano pin D3, a pin "TX" na pin D2!
 
 String lastUID = "";  // Na zamedzenie opakovaného výpisu
 const int BUFFER_SIZE = 14;
