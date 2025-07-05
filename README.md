@@ -28,51 +28,28 @@
 - 2x LED Diodes (RED and GREEN) and 2x 220 Ohm resistor (if u use LEDs)
 ### 📣 INFO 📣
 - Just added for show status (RED lights up if emulating or reading failed and green for opposite)
-# Connection
 
-## RDM6300
-- VCC -> 5V
-- GND -> GND
-- TX -> D6
-- RX -> D8
+## Table of connection
+| Komponent              | component | Arduino pin | Popis                                              |
+| ---------------------- | --------- | ----------- | -------------------------------------------------- |
+| **OLED displej (I2C)** | SDA       | A4          | I2C dátová linka                                   |
+|                        | SCL       | A5          | I2C hodinová linka                                 |
+| **RDM6300 (125 kHz)**  | TX        | D6 (RX)     | Prijímanie dát z RFID čítačky cez `SoftwareSerial` |
+|                        | RX        | D7 (TX)     | Nepoužívané – môže ostať nezapojené                |
+| **RC522 (13.56 MHz)**  | RST       | D9          | Reset RFID čítačky                                 |
+|                        | SS (SDA)  | D10         | SPI chip select pre RC522                          |
+|                        | MOSI      | D11         | SPI MOSI (zdieľané so SD kartou)                   |
+|                        | MISO      | D12         | SPI MISO (zdieľané so SD kartou)                   |
+|                        | SCK       | D13         | SPI hodiny (zdieľané so SD kartou)                 |
+| **SD karta (SPI)**     | CS        | D4          | SPI chip select pre SD modul                       |
+|                        | MOSI      | D11         | SPI MOSI (zdieľané s RC522)                        |
+|                        | MISO      | D12         | SPI MISO (zdieľané s RC522)                        |
+|                        | SCK       | D13         | SPI hodiny (zdieľané s RC522)                      |
+| **LED diódy**          | Zelená    | D8          | Indikácia úspechu (napr. uloženie UID)             |
+|                        | Červená   | D5          | Indikácia chyby (napr. chyba zápisu na SD)         |
+| **Tlačidlá**           | READ mód  | D2          | Čítanie UID (aktívne pri stlačení, `INPUT_PULLUP`) |
+|                        | WRITE mód | D3          | Zápis UID na SD kartu (`INPUT_PULLUP`)             |
 
-## MFRC522 RFID:
-- SDA -> D10
-- SCK -> D13
-- MOSI -> D11
-- MISO -> D12
-- IRQ -> Not connected
-- GND -> GND
-- RST -> D9
-- 3.3V -> 3.3V
-
-## OLED display 🖥:
-- VCC -> 5V
-- GND -> GND
-- SDA -> A4
-- SCL -> A5
-
-## SD Card:
-- VCC -> 5V
-- GND -> GND
-- MISO -> D12
-- MOSI -> D11
-- SCK -> D13
-- CS -> D4
-
-## RTC DS1307 or SD3231:
-- VCC -> 5V
-- GND -> GND
-- SCL -> A5
-- SDA -> A4
-
-## 🖲 Buttons :
-- Button Read -> D2
-- Button Emulate -> D3
-
-## 💡LED diodes:
-- GREEN LED -> D5 (throught 220 OHM resistor)
-- RED LED -> D6 (throught 220 OHM resistor)
 
 # UPDATES
   - Will be added 125 KHz support
