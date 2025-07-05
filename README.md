@@ -30,26 +30,28 @@
 - Just added for show status (RED lights up if emulating or reading failed and green for opposite)
 
 ## Table of connection
-| Komponent              | component | Arduino pin | Popis                                              |
-| ---------------------- | --------- | ----------- | -------------------------------------------------- |
-| **OLED displej (I2C)** | SDA       | A4          | I2C dátová linka                                   |
-|                        | SCL       | A5          | I2C hodinová linka                                 |
-| **RDM6300 (125 kHz)**  | TX        | D6 (RX)     | Prijímanie dát z RFID čítačky cez `SoftwareSerial` |
-|                        | RX        | D7 (TX)     | Nepoužívané – môže ostať nezapojené                |
-| **RC522 (13.56 MHz)**  | RST       | D9          | Reset RFID čítačky                                 |
-|                        | SS (SDA)  | D10         | SPI chip select pre RC522                          |
-|                        | MOSI      | D11         | SPI MOSI (zdieľané so SD kartou)                   |
-|                        | MISO      | D12         | SPI MISO (zdieľané so SD kartou)                   |
-|                        | SCK       | D13         | SPI hodiny (zdieľané so SD kartou)                 |
-| **SD karta (SPI)**     | CS        | D4          | SPI chip select pre SD modul                       |
-|                        | MOSI      | D11         | SPI MOSI (zdieľané s RC522)                        |
-|                        | MISO      | D12         | SPI MISO (zdieľané s RC522)                        |
-|                        | SCK       | D13         | SPI hodiny (zdieľané s RC522)                      |
-| **LED diódy**          | Zelená    | D8          | Indikácia úspechu (napr. uloženie UID)             |
-|                        | Červená   | D5          | Indikácia chyby (napr. chyba zápisu na SD)         |
-| **Tlačidlá**           | READ mód  | D2          | Čítanie UID (aktívne pri stlačení, `INPUT_PULLUP`) |
-|                        | WRITE mód | D3          | Zápis UID na SD kartu (`INPUT_PULLUP`)             |
-
+| Modul / Funkcia       | Signál / Popis       | Pin Arduino Nano    |
+| --------------------- | -------------------- | ------------------- |
+| **MFRC522 (SPI)**     | SDA (SS)             | **D10**             |
+|                       | SCK                  | D13 (SPI SCK)       |
+|                       | MOSI                 | D11 (SPI MOSI)      |
+|                       | MISO                 | D12 (SPI MISO)      |
+|                       | RST                  | **D9**              |
+|                       | VCC                  | 3.3V                |
+|                       | GND                  | GND                 |
+| **SD Karta (SPI)**    | CS                   | **D4**              |
+|                       | SCK                  | D13 (zdieľané)      |
+|                       | MOSI                 | D11 (zdieľané)      |
+|                       | MISO                 | D12 (zdieľané)      |
+|                       | VCC                  | 5V                  |
+|                       | GND                  | GND                 |
+| **OLED I2C**          | SDA                  | **A4**              |
+|                       | SCL                  | **A5**              |
+|                       | VCC                  | 3.3V / 5V           |
+|                       | GND                  | GND                 |
+| **RDM6300 (125 kHz)** | TX (výstup z modulu) | **D6** (RX Arduino) |
+|                       | VCC                  | 5V                  |
+|                       | GND                  | GND                 |
 
 # UPDATES
   - Will be added 125 KHz support
